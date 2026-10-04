@@ -22,6 +22,22 @@ body[data-theme="white"]{--bg:#FFFFFF;--fg:#1F1B16;--muted:#6F665B;--card:#F4F1E
 body[data-theme="sepia"]{--bg:#F4ECD8;--fg:#3B3024;--muted:#7A6A53;--card:#FBF6EA;--line:#E2D6BC;--sheet:#FFFBF2;--hl:rgba(232,176,48,.45)}
 body[data-theme="dark"]{--bg:#1C1C1E;--fg:#DCD7CE;--muted:#9C968B;--card:#2A2A2D;--line:#38383C;--sheet:#26262A;--hl:rgba(214,160,40,.42);--accent:#E07A52;--on-accent:#1a0d06}
 body[data-theme="black"]{--bg:#000000;--fg:#C9C3B8;--muted:#8E887E;--card:#141414;--line:#232323;--sheet:#121212;--hl:rgba(190,140,30,.45);--accent:#E07A52;--on-accent:#1a0d06}
+body[data-theme="gray"]{--bg:#E9E6E1;--fg:#2A2825;--muted:#6E6A63;--card:#F3F1ED;--line:#D6D2CA;--sheet:#F6F4F0;--hl:rgba(230,180,50,.42)}
+body[data-theme="mint"]{--bg:#E4EFE6;--fg:#243127;--muted:#5E7064;--card:#EFF6F0;--line:#CDE0D1;--sheet:#F1F8F2;--hl:rgba(120,190,120,.42);--accent:#2F7D5B}
+body[data-theme="navy"]{--bg:#141A2B;--fg:#CDD4E4;--muted:#8891A8;--card:#1E2638;--line:#2C3754;--sheet:#1B2234;--hl:rgba(130,160,230,.38);--accent:#7FA6E8;--on-accent:#0b1022}
+body[data-theme="nord"]{--bg:#2E3440;--fg:#D8DEE9;--muted:#9AA3B2;--card:#3B4252;--line:#434C5E;--sheet:#353B49;--hl:rgba(136,192,208,.38);--accent:#88C0D0;--on-accent:#111720}
+body[data-theme="glass"]{--bg:#DCE3EC;--fg:#1D2733;--muted:#5A6676;--card:rgba(255,255,255,.55);--line:rgba(255,255,255,.6);--sheet:rgba(250,251,253,.72);--hl:rgba(120,170,255,.4);--accent:#3B6EC8;--on-accent:#fff}
+
+/* Liquid Glass: soft gradient ground + frosted floating surfaces */
+body[data-theme="glass"]{background:linear-gradient(150deg,#E7ECF4 0%,#DCE6EA 42%,#EAE2EF 100%);background-attachment:fixed}
+body[data-theme="glass"] #reader{background:transparent}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  body[data-theme="glass"] .menu-top,body[data-theme="glass"] .menu-bot,body[data-theme="glass"] .sheet,
+  body[data-theme="glass"] .cont,body[data-theme="glass"] #hlBtn,body[data-theme="glass"] .tabs,
+  body[data-theme="glass"] #toast,body[data-theme="glass"] .pv-bot{
+    -webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7);
+    border:1px solid rgba(255,255,255,.55);box-shadow:0 8px 32px rgba(40,60,90,.16),inset 0 1px 0 rgba(255,255,255,.6)}
+}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:var(--ui)}
 body{overscroll-behavior:none}
@@ -114,7 +130,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:32px;margin:0}
 .act{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;border:none;background:none;font-size:16px;text-align:left;padding:0 4px;border-radius:10px}
 .act:active{background:var(--line)}
 .act.danger{color:#C0392B}
-body[data-theme="dark"] .act.danger,body[data-theme="black"] .act.danger{color:#FF7A6B}
+body[data-theme="dark"] .act.danger,body[data-theme="black"] .act.danger,body[data-theme="navy"] .act.danger,body[data-theme="nord"] .act.danger{color:#FF7A6B}
 
 .panel{position:fixed;inset:0;background:var(--bg);color:var(--fg);z-index:15;display:flex;flex-direction:column}
 .panel-head{display:flex;align-items:center;gap:4px;padding:calc(8px + var(--safe-t)) 6px 4px}
@@ -140,7 +156,7 @@ body[data-theme="dark"] .act.danger,body[data-theme="black"] .act.danger{color:#
 #pageView{position:fixed;inset:0;background:var(--bg);z-index:12;display:flex;flex-direction:column}
 #pvScroll{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;touch-action:pan-x pan-y}
 #pvCanvas{display:block;background:#fff;margin:8px auto}
-body[data-theme="dark"] #pvCanvas,body[data-theme="black"] #pvCanvas{filter:invert(.88) hue-rotate(180deg)}
+body[data-theme="dark"] #pvCanvas,body[data-theme="black"] #pvCanvas,body[data-theme="navy"] #pvCanvas,body[data-theme="nord"] #pvCanvas{filter:invert(.88) hue-rotate(180deg)}
 #pvCanvas.noinvert{filter:none!important}
 .pv-bot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px calc(10px + var(--safe-b));border-top:1px solid var(--line)}
 .pv-bot .pg{font-size:14px;color:var(--muted)}
@@ -166,6 +182,7 @@ body[data-theme="dark"] #pvCanvas,body[data-theme="black"] #pvCanvas{filter:inve
   </header>
   <input id="fileInput" type="file" accept="application/pdf,.pdf" multiple hidden>
   <input id="restoreInput" type="file" accept="application/json,.json" hidden>
+  <input id="coverInput" type="file" accept="image/*" hidden>
   <div id="libBody"></div>
 </section>
 
@@ -311,7 +328,7 @@ let S = {...DEF};
 async function loadSettings(){ try { const r = await DB.get('kv', 'settings'); if (r) S = {...DEF, ...r.v}; } catch(e){} }
 function saveSettings(){ DB.put('kv', {k:'settings', v:S}).catch(()=>{}); }
 const FONTS = {literata:'"Literata",Georgia,serif', serif:'"Noto Serif","Droid Serif",Georgia,serif', sans:'system-ui,"Roboto",sans-serif'};
-const THEME_BG = {white:'#FFFFFF', sepia:'#F4ECD8', dark:'#1C1C1E', black:'#000000'};
+const THEME_BG = {white:'#FFFFFF', sepia:'#F4ECD8', dark:'#1C1C1E', black:'#000000', gray:'#E9E6E1', mint:'#E4EFE6', navy:'#141A2B', nord:'#2E3440', glass:'#E7ECF4'};
 function applyTheme(){
   document.body.dataset.theme = S.theme;
   document.querySelector('meta[name=theme-color]').content = THEME_BG[S.theme];
@@ -410,7 +427,7 @@ async function importOne(file, key){
   pdf.destroy();
 
   const id = uid('b');
-  const book = {id, title, author, pages:n, chars, cover, scanned, outline, fileKey:key, fileName:file.name, size:file.size, addedAt:Date.now(), lastOpened:0};
+  const book = {id, title, author, pages:n, chars, cover, pageCover:cover, scanned, outline, fileKey:key, fileName:file.name, size:file.size, addedAt:Date.now(), lastOpened:0};
   await DB.put('files', {id, blob});
   await DB.put('content', {id, paras});
   await DB.put('books', book);
@@ -591,8 +608,17 @@ async function bookMenu(id){
   const b = await DB.get('books', id);
   openSheet(`<h3>${esc(b.title)}</h3>
     <div class="muted" style="font-size:13px;margin:-8px 0 10px">${b.pages} pages${b.author ? ' · ' + esc(b.author) : ''}</div>
+    <button class="act" id="bmCover"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5L5 20"/></svg> Choose cover from gallery</button>
+    ${b.customCover ? `<button class="act" id="bmCoverReset"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 109-9 9 9 0 00-6.3 2.6L3 8"/><path d="M3 4v4h4"/></svg> Reset cover to first page</button>` : ''}
     <button class="act" id="bmOpenPage">${ICON.back.replace('M15 5l-7 7 7 7','M6 3h9l4 4v14H6zM15 3v4h4')} Open in original page view</button>
     <button class="act danger" id="bmDel">${ICON.trash} Remove from library</button>`, sh => {
+    sh.querySelector('#bmCover').onclick = () => { const i = $('#coverInput'); i.dataset.book = id; i.click(); };
+    const rc = sh.querySelector('#bmCoverReset');
+    if (rc) rc.onclick = async () => {
+      const bk = await DB.get('books', id);
+      bk.cover = bk.pageCover || ''; delete bk.customCover; await DB.put('books', bk);
+      popLayer(); renderLibrary(); toast('Cover reset');
+    };
     sh.querySelector('#bmDel').onclick = async ev => {
       const btn = ev.currentTarget;
       if (!btn.dataset.sure) { btn.dataset.sure = '1'; btn.lastChild.textContent = ' Tap again to remove book, progress & bookmarks'; return; }
@@ -630,6 +656,33 @@ async function backup(){
   a.download = 'paperback-backup-' + new Date().toISOString().slice(0, 10) + '.json';
   document.body.appendChild(a); a.click(); a.remove();
   toast('Backup saved to Downloads');
+}
+$('#coverInput').addEventListener('change', async e => {
+  const f = e.target.files[0]; const id = e.target.dataset.book; e.target.value = '';
+  if (!f || !id) return;
+  if (!/^image\//.test(f.type)) return toast('Please choose an image');
+  try {
+    const dataUrl = await downscaleImage(f, 400, 600);
+    const bk = await DB.get('books', id); if (!bk) return;
+    if (!bk.pageCover) bk.pageCover = bk.cover || '';
+    bk.cover = dataUrl; bk.customCover = true; await DB.put('books', bk);
+    renderLibrary(); toast('Cover updated');
+  } catch (err) { console.error(err); toast("Couldn't use that image"); }
+});
+function downscaleImage(file, maxW, maxH){
+  return new Promise((res, rej) => {
+    const img = new Image(); const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const r = Math.min(maxW / img.width, maxH / img.height, 1);
+      const w = Math.max(1, Math.round(img.width * r)), h = Math.max(1, Math.round(img.height * r));
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      res(c.toDataURL('image/jpeg', 0.82));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('decode')); };
+    img.src = url;
+  });
 }
 $('#restoreInput').addEventListener('change', async e => {
   const f = e.target.files[0]; e.target.value = ''; if (!f) return;
@@ -979,7 +1032,7 @@ $('#tAa').addEventListener('click', () => {
     <div class="lbl">Font</div>${seg('ff', [['literata', 'Literata', 'font-family:Literata,serif'], ['serif', 'Serif', 'font-family:' + FONTS.serif.replace(/"/g, "'")], ['sans', 'Sans', 'font-family:' + FONTS.sans.replace(/"/g, "'")]], 3)}
     <div class="lbl">Line spacing</div>${seg('lh', [[1.35, 'Tight'], [1.6, 'Normal'], [1.9, 'Relaxed']], 3)}
     <div class="lbl">Margins</div>${seg('mg', [[14, 'Narrow'], [24, 'Normal'], [38, 'Wide']], 3)}
-    <div class="lbl">Theme</div>${seg('theme', [['white', 'White', 'background:#fff;color:#1F1B16'], ['sepia', 'Sepia', 'background:#F4ECD8;color:#3B3024'], ['dark', 'Dark', 'background:#1C1C1E;color:#DCD7CE'], ['black', 'Black', 'background:#000;color:#C9C3B8']], 4, 'themes')}
+    <div class="lbl">Theme</div>${seg('theme', [['white', 'White', 'background:#fff;color:#1F1B16'], ['sepia', 'Sepia', 'background:#F4ECD8;color:#3B3024'], ['gray', 'Gray', 'background:#E9E6E1;color:#2A2825'], ['mint', 'Mint', 'background:#E4EFE6;color:#243127'], ['glass', 'Glass', 'background:linear-gradient(145deg,#ECF1F8,#E3ECF0);color:#1D2733'], ['dark', 'Dark', 'background:#1C1C1E;color:#DCD7CE'], ['navy', 'Navy', 'background:#141A2B;color:#CDD4E4'], ['nord', 'Nord', 'background:#2E3440;color:#D8DEE9'], ['black', 'Black', 'background:#000;color:#C9C3B8']], 3, 'themes')}
     <label class="switch" style="margin-top:8px"><span>Justify text</span><input type="checkbox" id="sJust" ${S.justify ? 'checked' : ''}></label>
     <label class="switch"><span>Keep screen on<small>While a book is open</small></span><input type="checkbox" id="sWake" ${S.wake ? 'checked' : ''}></label>`, sh => {
     const relayout = () => { const off = R.pageStart; applyLayout(); goToOffset(off); saveSettings(); };
